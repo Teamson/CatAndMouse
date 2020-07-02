@@ -218,7 +218,7 @@
             this.isGotCheese = false;
             this.isHurt = false;
             this.curId = 0;
-            this.speed = 0.02;
+            this.speed = 0.05;
         }
         onAwake() {
             this.myOwner = this.owner;
@@ -279,8 +279,8 @@
                 let pos = new Laya.Vector3(0, 0, 0);
                 Laya.Vector3.add(this.myOwner.transform.position.clone(), dir, pos);
                 this.myOwner.transform.position = pos.clone();
-                if (this._ani.getCurrentAnimatorPlayState().animatorState.name != 'walk') {
-                    this.playAniByName('walk');
+                if (this._ani.getCurrentAnimatorPlayState().animatorState.name != 'run') {
+                    this.playAniByName('run');
                 }
                 let dis = Laya.Vector3.distance(this.myOwner.transform.position.clone(), this.targetNode.transform.position.clone());
                 if (dis <= 0.4) {
@@ -294,7 +294,7 @@
                 }
             }
             else {
-                if (this._ani.getCurrentAnimatorPlayState().animatorState.name == 'walk') {
+                if (this._ani.getCurrentAnimatorPlayState().animatorState.name == 'run') {
                     this.playAniByName('idle');
                 }
                 this._body.linearVelocity = new Laya.Vector3(0, 0, 0);
@@ -368,7 +368,7 @@
             this.isStayPoint = true;
             this.isIncreaseId = false;
             this.curId = 3;
-            this.speed = 0.04;
+            this.speed = 0.06;
         }
         onAwake() {
             this.myOwner = this.owner;

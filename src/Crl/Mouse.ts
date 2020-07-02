@@ -21,7 +21,7 @@ export default class Mouse extends Laya.Script3D {
     isHurt: boolean = false
 
     curId: number = 0;
-    speed: number = 0.02;
+    speed: number = 0.05;
 
     onAwake() {
         this.myOwner = this.owner as Laya.Sprite3D;
@@ -92,8 +92,8 @@ export default class Mouse extends Laya.Script3D {
             let pos = new Laya.Vector3(0, 0, 0)
             Laya.Vector3.add(this.myOwner.transform.position.clone(), dir, pos)
             this.myOwner.transform.position = pos.clone()
-            if (this._ani.getCurrentAnimatorPlayState().animatorState.name != 'walk') {
-                this.playAniByName('walk')
+            if (this._ani.getCurrentAnimatorPlayState().animatorState.name != 'run') {
+                this.playAniByName('run')
             }
 
             let dis = Laya.Vector3.distance(this.myOwner.transform.position.clone(), this.targetNode.transform.position.clone());
@@ -106,7 +106,7 @@ export default class Mouse extends Laya.Script3D {
                 this.tempTargetNode = this.targetNode
             }
         } else {
-            if (this._ani.getCurrentAnimatorPlayState().animatorState.name == 'walk') {
+            if (this._ani.getCurrentAnimatorPlayState().animatorState.name == 'run') {
                 this.playAniByName('idle')
             }
             this._body.linearVelocity = new Laya.Vector3(0, 0, 0);

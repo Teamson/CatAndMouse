@@ -23,7 +23,7 @@ export default class Cat extends Laya.Script3D {
     isStayPoint: boolean = true
     isIncreaseId: boolean = false
     curId: number = 3
-    speed: number = 0.04;
+    speed: number = 0.06;
 
     onAwake() {
         this.myOwner = this.owner as Laya.Sprite3D
