@@ -1,0 +1,7 @@
+{
+  "code": "import PlayerDataMgr from \"../Libs/PlayerDataMgr\";\r\nimport ShareMgr from \"../Mod/ShareMgr\";\r\nexport default class PowerUI extends Laya.Scene {\r\n    constructor() {\r\n        super();\r\n        this.closeBtn = this['closeBtn'];\r\n        this.getPowerBtn = this['getPowerBtn'];\r\n    }\r\n    onOpened() {\r\n        this.getPowerBtn.on(Laya.Event.CLICK, this, this.getPowerBtnCB);\r\n        this.closeBtn.on(Laya.Event.CLICK, this, this.closeBtnCB);\r\n    }\r\n    onClosed() {\r\n    }\r\n    getPowerBtnCB() {\r\n        let cb = () => {\r\n            PlayerDataMgr.getPower(5);\r\n            this.closeBtnCB();\r\n        };\r\n        ShareMgr.instance.shareGame(cb);\r\n    }\r\n    closeBtnCB() {\r\n        this.close();\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/LayaProjects/CatAndMouse/src/Libs/PlayerDataMgr.ts",
+    "E:/LayaProjects/CatAndMouse/src/Mod/ShareMgr.ts"
+  ]
+}

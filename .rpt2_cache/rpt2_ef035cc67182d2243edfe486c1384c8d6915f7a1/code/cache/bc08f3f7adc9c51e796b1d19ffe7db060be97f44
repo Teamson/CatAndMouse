@@ -1,0 +1,4 @@
+{
+  "code": "export default class MouseScript extends Laya.Script3D {\r\n    constructor() { super(); }\r\n    onAwake() {\r\n    }\r\n    onMouseDown() {\r\n        console.log(\"点击到了：\", Laya.MouseManager.instance.mouseX, Laya.MouseManager.instance.mouseY);\r\n    }\r\n}\r\n",
+  "references": []
+}

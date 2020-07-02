@@ -1,0 +1,4 @@
+{
+  "code": "export default class Cylinder extends Laya.Script3D {\r\n    constructor() {\r\n        super();\r\n        this.myOwner = null;\r\n    }\r\n    onAwake() {\r\n        this.myOwner = this.owner;\r\n    }\r\n}\r\n",
+  "references": []
+}

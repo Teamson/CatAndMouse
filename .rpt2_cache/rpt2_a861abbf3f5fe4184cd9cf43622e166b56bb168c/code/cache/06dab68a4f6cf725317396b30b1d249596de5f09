@@ -1,0 +1,4 @@
+{
+  "code": "export default class GameLogicCrl {\r\n    constructor() {\r\n        Laya.Scene.open('MyScenes/StartUI.scene');\r\n    }\r\n}\r\n",
+  "references": []
+}

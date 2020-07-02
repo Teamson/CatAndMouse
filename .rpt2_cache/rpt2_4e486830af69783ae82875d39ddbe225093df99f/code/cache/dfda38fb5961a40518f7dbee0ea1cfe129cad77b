@@ -1,0 +1,7 @@
+{
+  "code": "import Mouse from \"./Mouse\";\r\nimport GameLogicCrl from \"./GameLogicCrl\";\r\nexport default class Cheese extends Laya.Script3D {\r\n    constructor() {\r\n        super();\r\n        this.myOwner = null;\r\n        this.gotCount = 0;\r\n    }\r\n    onAwake() {\r\n        this.myOwner = this.owner;\r\n    }\r\n    onUpdate() {\r\n        if (GameLogicCrl.Share._MouseNode) {\r\n            for (let i = 0; i < GameLogicCrl.Share._MouseNode.numChildren; i++) {\r\n                let m = GameLogicCrl.Share._MouseNode.getChildAt(i);\r\n                let mCrl = m.getComponent(Mouse);\r\n                if (Laya.Vector3.distance(m.transform.position.clone(), this.myOwner.transform.position.clone()) <= 1 && !mCrl.isGotCheese) {\r\n                    mCrl.isGotCheese = true;\r\n                    this.gotCount++;\r\n                    if (this.gotCount >= GameLogicCrl.Share.countForWin) {\r\n                        GameLogicCrl.Share.winCallback();\r\n                    }\r\n                    console.log('got cheese');\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/LayaProjects/CatAndMouse/src/Crl/Mouse.ts",
+    "E:/LayaProjects/CatAndMouse/src/Crl/GameLogicCrl.ts"
+  ]
+}

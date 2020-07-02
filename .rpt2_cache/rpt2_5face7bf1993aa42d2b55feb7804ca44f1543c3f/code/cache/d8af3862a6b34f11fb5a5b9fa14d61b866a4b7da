@@ -1,0 +1,4 @@
+{
+  "code": "export var PropName;\r\n(function (PropName) {\r\n    PropName[\"PROP_CLIP\"] = \"Clip\";\r\n    PropName[\"PROP_INDOOR\"] = \"InDoor\";\r\n    PropName[\"PROP_OUTDOOR\"] = \"OutDoor\";\r\n    PropName[\"PROP_PEPPER\"] = \"Pepper\";\r\n    PropName[\"PROP_COIN\"] = \"Coin\";\r\n    PropName[\"PROP_FIRE\"] = \"Fire\";\r\n    PropName[\"PROP_CHEESE\"] = \"Cheese\";\r\n    PropName[\"PROP_DESDOOR\"] = \"DesDoor\";\r\n})(PropName || (PropName = {}));\r\n",
+  "references": []
+}

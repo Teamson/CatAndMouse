@@ -1,0 +1,4 @@
+{
+  "code": "export default class GameUI extends Laya.Scene {\r\n    constructor() {\r\n        super();\r\n    }\r\n    onOpened(param) {\r\n    }\r\n    onClosed() {\r\n    }\r\n}\r\n",
+  "references": []
+}

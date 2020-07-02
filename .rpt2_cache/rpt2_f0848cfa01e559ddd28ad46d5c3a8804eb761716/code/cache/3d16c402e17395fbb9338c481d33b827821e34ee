@@ -1,0 +1,7 @@
+{
+  "code": "import WxApi from \"../Libs/WxApi\";\r\nimport GameLogicCrl from \"../Crl/GameLogicCrl\";\r\nexport default class LoadingUI extends Laya.Scene {\r\n    constructor() {\r\n        super();\r\n    }\r\n    onOpened() {\r\n        this.loadRes();\r\n    }\r\n    onClosed() {\r\n    }\r\n    loadRes() {\r\n        var resUrl = [\r\n            WxApi.UnityPath + 'Scene1.lh'\r\n        ];\r\n        Laya.loader.create(resUrl, Laya.Handler.create(this, this.onComplete), Laya.Handler.create(this, this.onProgress));\r\n    }\r\n    onComplete() {\r\n        Laya.Scene.open('MyScenes/StartUI.scene');\r\n        GameLogicCrl.Share.initScene();\r\n    }\r\n    onProgress(value) {\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/LayaProjects/CatAndMouse/src/Libs/WxApi.ts",
+    "E:/LayaProjects/CatAndMouse/src/Crl/GameLogicCrl.ts"
+  ]
+}

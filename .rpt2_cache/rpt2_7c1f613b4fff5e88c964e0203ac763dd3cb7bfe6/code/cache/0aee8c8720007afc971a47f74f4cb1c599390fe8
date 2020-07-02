@@ -1,0 +1,7 @@
+{
+  "code": "export default class Mouse extends Laya.Script3D {\r\n    constructor() {\r\n        super();\r\n        this.myOwner = null;\r\n        this._body = null;\r\n        this.targetNode = null;\r\n        this.pointTarget = null;\r\n        this.isToPos = true;\r\n        this.curId = 1;\r\n        this.speed = 2;\r\n    }\r\n    onAwake() {\r\n        this.myOwner = this.owner;\r\n        this._body = this.myOwner.getComponent(Laya.Rigidbody3D);\r\n    }\r\n    onUpdate() {\r\n    }\r\n    onLateUpdate() {\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/LayaProjects/CatAndMouse/src/Crl/GameLogicCrl.ts",
+    "E:/LayaProjects/CatAndMouse/src/Mod/Utility.ts"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "code": "export default class GameUI extends Laya.Scene {\r\n    constructor() {\r\n        super();\r\n        this.touchPanel = this['touchPanel'];\r\n    }\r\n    onOpened(param) {\r\n        this.initData();\r\n    }\r\n    onClosed() {\r\n    }\r\n    initData() {\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/LayaProjects/CatAndMouse/src/Crl/GameLogicCrl.ts"
+  ]
+}

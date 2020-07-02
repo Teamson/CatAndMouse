@@ -1,0 +1,4 @@
+{
+  "code": "export default class StartUI extends Laya.Scene {\r\n    constructor() {\r\n        super();\r\n        this.startBtn = this['startBtn'];\r\n    }\r\n    onOpened(param) {\r\n        this.startBtn.on(Laya.Event.CLICK, this, this.startBtnCB);\r\n    }\r\n    onClosed() {\r\n    }\r\n    startBtnCB() {\r\n        Laya.Scene.open('MyScenes/GameUI.scene');\r\n    }\r\n}\r\n",
+  "references": []
+}

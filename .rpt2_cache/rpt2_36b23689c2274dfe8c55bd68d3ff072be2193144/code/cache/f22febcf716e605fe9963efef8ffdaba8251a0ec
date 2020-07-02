@@ -1,0 +1,7 @@
+{
+  "code": "import WxApi from \"../Libs/WxApi\";\r\nimport GameLogicCrl from \"../Crl/GameLogicCrl\";\r\nexport default class LoadingUI extends Laya.Scene {\r\n    constructor() {\r\n        super();\r\n        this.bar = this['bar'];\r\n        this.cheese = this['cheese'];\r\n        this.perNum = this['perNum'];\r\n    }\r\n    onOpened() {\r\n        this.loadRes();\r\n    }\r\n    onClosed() {\r\n    }\r\n    loadRes() {\r\n        var resUrl = [\r\n            WxApi.UnityPath + 'Scene1.lh'\r\n        ];\r\n        Laya.loader.create(resUrl, Laya.Handler.create(this, this.onComplete), Laya.Handler.create(this, this.onProgress));\r\n    }\r\n    onComplete() {\r\n        Laya.Scene.open('MyScenes/StartUI.scene');\r\n        GameLogicCrl.Share.initScene();\r\n    }\r\n    onProgress(value) {\r\n        this.bar.width = 600 * value;\r\n        this.perNum.value = Math.floor(value * 100).toString() + '%';\r\n        this.cheese.x = 75 + this.bar.width;\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/LayaProjects/CatAndMouse/src/Libs/WxApi.ts",
+    "E:/LayaProjects/CatAndMouse/src/Crl/GameLogicCrl.ts"
+  ]
+}

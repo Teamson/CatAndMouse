@@ -1,0 +1,7 @@
+{
+  "code": "import GameLogicCrl from \"./GameLogicCrl\";\r\nimport Utility from \"../Mod/Utility\";\r\nexport default class Mouse extends Laya.Script3D {\r\n    constructor() {\r\n        super();\r\n        this.myOwner = null;\r\n        this._body = null;\r\n        this.targetNode = null;\r\n        this.speed = 1;\r\n    }\r\n    onAwake() {\r\n        this.myOwner = this.owner;\r\n        this._body = this.myOwner.getComponent(Laya.Rigidbody3D);\r\n    }\r\n    onUpdate() {\r\n        if (GameLogicCrl.Share.validPointArr.length > 0) {\r\n            this.targetNode = GameLogicCrl.Share.validPointArr[0];\r\n        }\r\n        else {\r\n            this.targetNode = null;\r\n        }\r\n    }\r\n    onLateUpdate() {\r\n        if (this.targetNode == null)\r\n            return;\r\n        let dir = Utility.getDirectionAToB(this.myOwner, this.targetNode);\r\n        dir = new Laya.Vector3(dir.x * this.speed, dir.y * this.speed, dir.z * this.speed);\r\n        this._body.linearVelocity = new Laya.Vector3(dir.x * this.speed, dir.y * this.speed, dir.z * this.speed);\r\n    }\r\n    onCollisionEnter(collision) {\r\n    }\r\n    onCollisionStay(collision) {\r\n    }\r\n    onCollisionExit(collision) {\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/LayaProjects/CatAndMouse/src/Crl/GameLogicCrl.ts",
+    "E:/LayaProjects/CatAndMouse/src/Mod/Utility.ts"
+  ]
+}

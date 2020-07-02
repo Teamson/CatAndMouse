@@ -1,0 +1,6 @@
+{
+  "code": "import GameLogicCrl from \"../Crl/GameLogicCrl\";\r\nexport default class VictoryUI extends Laya.Scene {\r\n    constructor() {\r\n        super();\r\n        this.noBounes = this['noBounes'];\r\n        this.bounesNode = this['bounesNode'];\r\n        this.gradeNum = this['gradeNum'];\r\n        this.gradeBar = this['gradeBar'];\r\n        this.coinNum = this['coinNum'];\r\n        this.nextBtn = this['nextBtn'];\r\n        this.gradeNum1 = this['gradeNum1'];\r\n        this.skinPic = this['skinPic'];\r\n        this.getSkinBtn = this['getSkinBtn'];\r\n        this.noBtn = this['noBtn'];\r\n    }\r\n    onOpened() {\r\n        this.nextBtn.on(Laya.Event.CLICK, this, this.nextBtnCB);\r\n        this.getSkinBtn.on(Laya.Event.CLICK, this, this.getSkinBtnCB);\r\n        this.noBtn.on(Laya.Event.CLICK, this, this.noBtnCB);\r\n    }\r\n    onClosed() {\r\n    }\r\n    nextBtnCB() {\r\n        Laya.Scene.open('MyScenes/StartUI.scene');\r\n        GameLogicCrl.Share.restartGame();\r\n    }\r\n    getSkinBtnCB() {\r\n    }\r\n    noBtnCB() {\r\n        Laya.Scene.open('MyScenes/StartUI.scene');\r\n        GameLogicCrl.Share.restartGame();\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/LayaProjects/CatAndMouse/src/Crl/GameLogicCrl.ts"
+  ]
+}

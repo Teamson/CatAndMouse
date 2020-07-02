@@ -1,0 +1,6 @@
+{
+  "code": "import GameLogicCrl from \"../Crl/GameLogicCrl\";\r\nexport default class DefeatUI extends Laya.Scene {\r\n    constructor() {\r\n        super();\r\n        this.gradeNum = this['gradeNum'];\r\n        this.gradeBar = this['gradeBar'];\r\n        this.tipsBtn = this['tipsBtn'];\r\n        this.noBtn = this['noBtn'];\r\n    }\r\n    onOpened() {\r\n        this.tipsBtn.on(Laya.Event.CLICK, this, this.tipsBtnCB);\r\n        this.noBtn.on(Laya.Event.CLICK, this, this.noBtnCB);\r\n    }\r\n    onClosed() {\r\n    }\r\n    tipsBtnCB() {\r\n    }\r\n    noBtnCB() {\r\n        Laya.Scene.open('MyScenes/StartUI.scene');\r\n        GameLogicCrl.Share.restartGame();\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/LayaProjects/CatAndMouse/src/Crl/GameLogicCrl.ts"
+  ]
+}
