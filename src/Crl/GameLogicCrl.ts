@@ -7,6 +7,7 @@ import PlayerDataMgr from "../Libs/PlayerDataMgr";
 import Clip from "./Clip";
 import TimeCountMgr from "../Libs/TimeCountMgr";
 import ShareMgr from "../Mod/ShareMgr";
+import StarPoint from "./StarPoint";
 
 export default class GameLogicCrl {
     public static Share: GameLogicCrl
@@ -19,11 +20,13 @@ export default class GameLogicCrl {
     public _Cat: Laya.Sprite3D = null
     public _MouseNode: Laya.Sprite3D = null
 
+    public _starNode: Laya.Sprite3D = null
     public currentCollNode: Laya.Sprite3D = null
     public currentPointsNode: Laya.Sprite3D = null
     public currentPosNode: Laya.Sprite3D = null
     public validPointArr: Laya.Sprite3D[] = []
     public propNode: Laya.Sprite3D = null
+    public collPoints: Laya.Sprite3D[] = []
 
     public cheeseId: number = -1
     public countForWin: number = 10
@@ -54,12 +57,17 @@ export default class GameLogicCrl {
 
         this._camera = this._scene.getChildByName('Main Camera') as Laya.Camera
         this._light = this._scene.getChildByName('Directional Light') as Laya.DirectionLight
+        this._starNode = this._scene.getChildByName('AStarNode') as Laya.Sprite3D
 
         this.createGameScene()
+        for (let i = 0; i < this._starNode.numChildren; i++) {
+            let s = this._starNode.getChildAt(i) as Laya.Sprite3D
+            s.addComponent(StarPoint)
+        }
     }
 
     createGameScene() {
-        let curGid: number = PlayerDataMgr.getPlayerData().grade
+        let curGid: number = 1//PlayerDataMgr.getPlayerData().grade
         let sceneRes: Laya.Sprite3D = Laya.loader.getRes(WxApi.UnityPath + 'Scene' + curGid + '.lh') as Laya.Sprite3D
         this._gradeScene = Laya.Sprite3D.instantiate(sceneRes, this._scene, false, new Laya.Vector3(0, 0, 0));
 
@@ -69,6 +77,13 @@ export default class GameLogicCrl {
         this.currentPointsNode = this._gradeScene.getChildByName('PointNode') as Laya.Sprite3D
         this.currentPosNode = this._gradeScene.getChildByName('PosNode') as Laya.Sprite3D
         this.propNode = this._gradeScene.getChildByName('PropNode') as Laya.Sprite3D
+
+        for (let i = 0; i < this.currentCollNode.numChildren; i++) {
+            let pn = this._gradeScene.getChildByName('PointNode') as Laya.Sprite3D
+            for (let j = 0; j < pn.numChildren; j++) {
+                this.collPoints.push(pn.getChildAt(j) as Laya.Sprite3D)
+            }
+        }
 
         this.addCollComponents()
         this.addPropComponents()

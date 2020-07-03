@@ -14,7 +14,7 @@ export default class Mouse extends Laya.Script3D {
     targetNode: Laya.Sprite3D = null;
     tempTargetNode: Laya.Sprite3D = null
     pointTarget: Laya.Sprite3D = null;
-    isToPoint: boolean = false;
+    isStayPoint: boolean = true
     isGotDes: boolean = false
     isGotCheese: boolean = false;
 
@@ -53,13 +53,13 @@ export default class Mouse extends Laya.Script3D {
 
     onUpdate() {
         //if (GameLogicCrl.Share.isOver) return
-
-        if(this.isGotCheese){
+        this.targetNode = null
+        if (this.isGotCheese) {
             this.targetNode = GameLogicCrl.Share.propNode.getChildByName('DesDoor') as Laya.Sprite3D
             return
         }
 
-        if (this.curId == GameLogicCrl.Share.cheeseId) {
+        if (this.curId == GameLogicCrl.Share.cheeseId && this.isStayPoint) {
             this.targetNode = GameLogicCrl.Share.propNode.getChildByName('Cheese') as Laya.Sprite3D
             return
         }
@@ -102,6 +102,12 @@ export default class Mouse extends Laya.Script3D {
                     this.curId += 1
                 } else if (this.curId >= GameLogicCrl.Share.currentPosNode.numChildren) {
                     this.curId += 1
+                }
+
+                if (this.targetNode.parent.name == 'PosNode') {
+                    this.isStayPoint = false
+                } else if (this.targetNode.parent.name == 'PointNode') {
+                    this.isStayPoint = true
                 }
                 this.tempTargetNode = this.targetNode
             }
@@ -160,8 +166,9 @@ export default class Mouse extends Laya.Script3D {
         let desId: number = parseInt(outDoor.getChildAt(0).name)
         let pos = outDoor.transform.position.clone()
         this.myOwner.transform.position = pos
-        this.curId = desId - 1
+        this.curId = desId
         this.tempTargetNode = null
+        this.isStayPoint = false
     }
 
     triggerPepper() {

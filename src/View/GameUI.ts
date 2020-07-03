@@ -39,7 +39,7 @@ export default class GameUI extends Laya.Scene {
         GameLogicCrl.Share._camera.viewportPointToRay(pos, ray)
         GameLogicCrl.Share._scene.physicsSimulation.rayCast(ray, hitResult)
         if (hitResult.succeeded && hitResult.collider.owner.name == 'Coll') {
-            console.log(hitResult.collider.owner.name);
+            //console.log(hitResult.collider.owner.name);
             let torus = hitResult.collider.owner.parent;
             (torus.getComponent(Capsule) as Capsule).clicked();
         }

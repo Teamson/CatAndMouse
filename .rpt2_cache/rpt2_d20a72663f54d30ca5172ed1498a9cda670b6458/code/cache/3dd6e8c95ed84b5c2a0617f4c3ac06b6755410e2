@@ -1,0 +1,6 @@
+{
+  "code": "import GameLogicCrl from \"./GameLogicCrl\";\r\nexport default class StarPoint extends Laya.Script {\r\n    constructor() {\r\n        super();\r\n        this.myOwner = null;\r\n        this.myBox = null;\r\n        this.isColl = false;\r\n    }\r\n    onAwake() {\r\n        this.myOwner = this.owner;\r\n    }\r\n    checkIsContainPoint(p) {\r\n        if (Laya.Vector3.distance(this.myOwner.transform.position.clone(), p) < 1) {\r\n            return true;\r\n        }\r\n        else {\r\n            return false;\r\n        }\r\n    }\r\n    onUpdate() {\r\n        for (let i = 0; i < GameLogicCrl.Share.collPoints.length; i++) {\r\n            let c = GameLogicCrl.Share.collPoints[i];\r\n            if (this.checkIsContainPoint(c.transform.position.clone())) {\r\n                this.isColl = true;\r\n                console.log(this.owner.name);\r\n                return;\r\n            }\r\n        }\r\n        this.isColl = false;\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/LayaProjects/CatAndMouse/src/Crl/GameLogicCrl.ts"
+  ]
+}

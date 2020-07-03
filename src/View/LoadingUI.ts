@@ -53,7 +53,8 @@ export default class LoadingUI extends Laya.Scene {
             WxApi.UnityPath + 'Scene2.lh',
             WxApi.UnityPath + 'Scene3.lh',
             WxApi.UnityPath + 'Scene4.lh',
-            WxApi.UnityPath + 'Scene5.lh'
+            WxApi.UnityPath + 'Scene5.lh',
+            WxApi.UnityPath + 'Scene6.lh'
         ];
         Laya.loader.create(resUrl, Laya.Handler.create(this, this.onComplete), Laya.Handler.create(this, this.onProgress));
     }

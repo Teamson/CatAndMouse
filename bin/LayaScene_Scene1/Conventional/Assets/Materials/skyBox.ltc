@@ -1,0 +1,8 @@
+{
+	"front":"skyBox_PositiveZ.png",
+	"back":"skyBox_NegativeZ.png",
+	"left":"skyBox_PositiveX.png",
+	"right":"skyBox_NegativeX.png",
+	"up":"skyBox_PositiveY.png",
+	"down":"skyBox_NegativeY.png"
+}

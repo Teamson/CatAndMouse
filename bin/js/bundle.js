@@ -213,7 +213,7 @@
             this.targetNode = null;
             this.tempTargetNode = null;
             this.pointTarget = null;
-            this.isToPoint = false;
+            this.isStayPoint = true;
             this.isGotDes = false;
             this.isGotCheese = false;
             this.isHurt = false;
@@ -244,11 +244,12 @@
         getValidPoint() {
         }
         onUpdate() {
+            this.targetNode = null;
             if (this.isGotCheese) {
                 this.targetNode = GameLogicCrl.Share.propNode.getChildByName('DesDoor');
                 return;
             }
-            if (this.curId == GameLogicCrl.Share.cheeseId) {
+            if (this.curId == GameLogicCrl.Share.cheeseId && this.isStayPoint) {
                 this.targetNode = GameLogicCrl.Share.propNode.getChildByName('Cheese');
                 return;
             }
@@ -289,6 +290,12 @@
                     }
                     else if (this.curId >= GameLogicCrl.Share.currentPosNode.numChildren) {
                         this.curId += 1;
+                    }
+                    if (this.targetNode.parent.name == 'PosNode') {
+                        this.isStayPoint = false;
+                    }
+                    else if (this.targetNode.parent.name == 'PointNode') {
+                        this.isStayPoint = true;
                     }
                     this.tempTargetNode = this.targetNode;
                 }
@@ -343,8 +350,9 @@
             let desId = parseInt(outDoor.getChildAt(0).name);
             let pos = outDoor.transform.position.clone();
             this.myOwner.transform.position = pos;
-            this.curId = desId - 1;
+            this.curId = desId;
             this.tempTargetNode = null;
+            this.isStayPoint = false;
         }
         triggerPepper() {
         }
@@ -1013,16 +1021,49 @@
         }
     }
 
+    class StarPoint extends Laya.Script {
+        constructor() {
+            super();
+            this.myOwner = null;
+            this.myBox = null;
+            this.isColl = false;
+        }
+        onAwake() {
+            this.myOwner = this.owner;
+        }
+        checkIsContainPoint(p) {
+            if (Laya.Vector3.distance(this.myOwner.transform.position.clone(), p) < 1) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        onUpdate() {
+            for (let i = 0; i < GameLogicCrl.Share.collPoints.length; i++) {
+                let c = GameLogicCrl.Share.collPoints[i];
+                if (this.checkIsContainPoint(c.transform.position.clone())) {
+                    this.isColl = true;
+                    console.log(this.owner.name);
+                    return;
+                }
+            }
+            this.isColl = false;
+        }
+    }
+
     class GameLogicCrl {
         constructor() {
             this._gradeScene = null;
             this._Cat = null;
             this._MouseNode = null;
+            this._starNode = null;
             this.currentCollNode = null;
             this.currentPointsNode = null;
             this.currentPosNode = null;
             this.validPointArr = [];
             this.propNode = null;
+            this.collPoints = [];
             this.cheeseId = -1;
             this.countForWin = 10;
             this.isVictory = false;
@@ -1043,10 +1084,15 @@
             Laya.stage.setChildIndex(this._scene, 0);
             this._camera = this._scene.getChildByName('Main Camera');
             this._light = this._scene.getChildByName('Directional Light');
+            this._starNode = this._scene.getChildByName('AStarNode');
             this.createGameScene();
+            for (let i = 0; i < this._starNode.numChildren; i++) {
+                let s = this._starNode.getChildAt(i);
+                s.addComponent(StarPoint);
+            }
         }
         createGameScene() {
-            let curGid = PlayerDataMgr.getPlayerData().grade;
+            let curGid = 1;
             let sceneRes = Laya.loader.getRes(WxApi.UnityPath + 'Scene' + curGid + '.lh');
             this._gradeScene = Laya.Sprite3D.instantiate(sceneRes, this._scene, false, new Laya.Vector3(0, 0, 0));
             this._Cat = this._gradeScene.getChildByName('Cat');
@@ -1055,6 +1101,12 @@
             this.currentPointsNode = this._gradeScene.getChildByName('PointNode');
             this.currentPosNode = this._gradeScene.getChildByName('PosNode');
             this.propNode = this._gradeScene.getChildByName('PropNode');
+            for (let i = 0; i < this.currentCollNode.numChildren; i++) {
+                let pn = this._gradeScene.getChildByName('PointNode');
+                for (let j = 0; j < pn.numChildren; j++) {
+                    this.collPoints.push(pn.getChildAt(j));
+                }
+            }
             this.addCollComponents();
             this.addPropComponents();
             this.countForWin = this._MouseNode.numChildren - 3;
@@ -1178,7 +1230,6 @@
             GameLogicCrl.Share._camera.viewportPointToRay(pos, ray);
             GameLogicCrl.Share._scene.physicsSimulation.rayCast(ray, hitResult);
             if (hitResult.succeeded && hitResult.collider.owner.name == 'Coll') {
-                console.log(hitResult.collider.owner.name);
                 let torus = hitResult.collider.owner.parent;
                 torus.getComponent(Capsule).clicked();
             }
@@ -1231,7 +1282,8 @@
                 WxApi.UnityPath + 'Scene2.lh',
                 WxApi.UnityPath + 'Scene3.lh',
                 WxApi.UnityPath + 'Scene4.lh',
-                WxApi.UnityPath + 'Scene5.lh'
+                WxApi.UnityPath + 'Scene5.lh',
+                WxApi.UnityPath + 'Scene6.lh'
             ];
             Laya.loader.create(resUrl, Laya.Handler.create(this, this.onComplete), Laya.Handler.create(this, this.onProgress));
         }
