@@ -1,0 +1,13 @@
+{
+  "code": "import DefeatUI from \"./View/DefeatUI\";\r\nimport FixNodeY from \"./Libs/FixNodeY\";\r\nimport GameUI from \"./View/GameUI\";\r\nimport LoadingUI from \"./View/LoadingUI\";\r\nimport PowerUI from \"./View/PowerUI\";\r\nimport SkinUI from \"./View/SkinUI\";\r\nimport StartUI from \"./View/StartUI\";\r\nimport VictoryUI from \"./View/VictoryUI\";\r\nexport default class GameConfig {\r\n    constructor() {\r\n    }\r\n    static init() {\r\n        var reg = Laya.ClassUtils.regClass;\r\n        reg(\"View/DefeatUI.ts\", DefeatUI);\r\n        reg(\"Libs/FixNodeY.ts\", FixNodeY);\r\n        reg(\"View/GameUI.ts\", GameUI);\r\n        reg(\"View/LoadingUI.ts\", LoadingUI);\r\n        reg(\"View/PowerUI.ts\", PowerUI);\r\n        reg(\"View/SkinUI.ts\", SkinUI);\r\n        reg(\"View/StartUI.ts\", StartUI);\r\n        reg(\"View/VictoryUI.ts\", VictoryUI);\r\n    }\r\n}\r\nGameConfig.width = 750;\r\nGameConfig.height = 1334;\r\nGameConfig.scaleMode = \"fixedwidth\";\r\nGameConfig.screenMode = \"vertical\";\r\nGameConfig.alignV = \"middle\";\r\nGameConfig.alignH = \"center\";\r\nGameConfig.startScene = \"MyScenes/DefeatUI.scene\";\r\nGameConfig.sceneRoot = \"\";\r\nGameConfig.debug = false;\r\nGameConfig.stat = false;\r\nGameConfig.physicsDebug = false;\r\nGameConfig.exportSceneToJson = true;\r\nGameConfig.init();\r\n",
+  "references": [
+    "E:/GitProjects/CatAndMouse/src/View/DefeatUI.ts",
+    "E:/GitProjects/CatAndMouse/src/Libs/FixNodeY.ts",
+    "E:/GitProjects/CatAndMouse/src/View/GameUI.ts",
+    "E:/GitProjects/CatAndMouse/src/View/LoadingUI.ts",
+    "E:/GitProjects/CatAndMouse/src/View/PowerUI.ts",
+    "E:/GitProjects/CatAndMouse/src/View/SkinUI.ts",
+    "E:/GitProjects/CatAndMouse/src/View/StartUI.ts",
+    "E:/GitProjects/CatAndMouse/src/View/VictoryUI.ts"
+  ]
+}

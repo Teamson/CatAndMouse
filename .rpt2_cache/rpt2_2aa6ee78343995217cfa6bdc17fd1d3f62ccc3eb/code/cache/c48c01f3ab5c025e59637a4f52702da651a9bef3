@@ -1,0 +1,9 @@
+{
+  "code": "import GameLogicCrl from \"../Crl/GameLogicCrl\";\r\nimport Capsule from \"../Crl/Capsule\";\r\nimport PlayerDataMgr from \"../Libs/PlayerDataMgr\";\r\nexport default class GameUI extends Laya.Scene {\r\n    constructor() {\r\n        super();\r\n        this.selectColl = null;\r\n        this.collMoveDir = new Laya.Vector3(0, 0, 0);\r\n        this.prePos = new Laya.Vector2(0, 0);\r\n        this.touchPanel = this['touchPanel'];\r\n        this.gradeNum = this['gradeNums'];\r\n    }\r\n    onOpened(param) {\r\n        this.initData();\r\n    }\r\n    onClosed() {\r\n        Laya.timer.clearAll(this);\r\n    }\r\n    initData() {\r\n        this.touchPanel.on(Laya.Event.MOUSE_DOWN, this, this.touchStart);\r\n        this.touchPanel.on(Laya.Event.MOUSE_MOVE, this, this.touchMove);\r\n        this.touchPanel.on(Laya.Event.MOUSE_UP, this, this.touchEnd);\r\n        this.gradeNum.value = PlayerDataMgr.getPlayerData().grade.toString();\r\n    }\r\n    touchStart(event) {\r\n        let pos = new Laya.Vector2(event.stageX, event.stageY);\r\n        let hitResult = new Laya.HitResult();\r\n        let ray = new Laya.Ray(new Laya.Vector3(0, 0, 0), new Laya.Vector3(0, 0, 0));\r\n        GameLogicCrl.Share._camera.viewportPointToRay(pos, ray);\r\n        GameLogicCrl.Share._scene.physicsSimulation.rayCast(ray, hitResult);\r\n        if (hitResult.succeeded && hitResult.collider.owner.name == 'Coll') {\r\n            let torus = hitResult.collider.owner.parent;\r\n            torus.getComponent(Capsule).clicked();\r\n        }\r\n    }\r\n    touchMove(event) {\r\n    }\r\n    touchEnd(event) {\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/GitProjects/CatAndMouse/src/Crl/GameLogicCrl.ts",
+    "E:/GitProjects/CatAndMouse/src/Mod/Utility.ts",
+    "E:/GitProjects/CatAndMouse/src/Crl/Capsule.ts",
+    "E:/GitProjects/CatAndMouse/src/Libs/PlayerDataMgr.ts"
+  ]
+}

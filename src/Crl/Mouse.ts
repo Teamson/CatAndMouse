@@ -2,6 +2,8 @@ import GameLogicCrl from "./GameLogicCrl"
 import Utility from "../Mod/Utility"
 import Capsule from "./Capsule"
 import { PropName } from "../Libs/Entity";
+import StarPoint from "./StarPoint";
+import AStar from "../Libs/AStar";
 
 export default class Mouse extends Laya.Script3D {
     constructor() {
@@ -13,8 +15,6 @@ export default class Mouse extends Laya.Script3D {
     _ani: Laya.Animator = null
     targetNode: Laya.Sprite3D = null;
     tempTargetNode: Laya.Sprite3D = null
-    pointTarget: Laya.Sprite3D = null;
-    isStayPoint: boolean = true
     isGotDes: boolean = false
     isGotCheese: boolean = false;
 
@@ -23,65 +23,40 @@ export default class Mouse extends Laya.Script3D {
     curId: number = 0;
     speed: number = 0.05;
 
+    starId: number = 0
+    wayPointArr: Laya.Sprite3D[] = []
+
     onAwake() {
         this.myOwner = this.owner as Laya.Sprite3D;
         this._ani = this.myOwner.getComponent(Laya.Animator) as Laya.Animator
         this.playAniByName('idle')
         this._body = this.myOwner.getComponent(Laya.Rigidbody3D) as Laya.Rigidbody3D;
-        this.tempTargetNode = GameLogicCrl.Share.currentPointsNode.getChildAt(0) as Laya.Sprite3D;
+
+        this.starId = AStar.getMyStarId(this.myOwner.transform.position.clone())
     }
 
     playAniByName(name: string) {
         this._ani.play(name)
     }
 
-    getValidPos(): number[] {
-        let posArr: number[] = [];
-        for (let i = 0; i < GameLogicCrl.Share.currentCollNode.numChildren; i++) {
-            let coll = GameLogicCrl.Share.currentCollNode.getChildAt(i) as Laya.Sprite3D;
-            let cCrl = coll.getComponent(Capsule) as Capsule;
-            if (cCrl.isOpen) {
-                posArr.push(i)
-            }
+    findWayPoint(endId: number) {
+        this.targetNode = null
+        this.wayPointArr = []
+        //this.starId = AStar.getMyStarId(this.myOwner.transform.position.clone())
+        if (this.starId == -1) return
+        this.wayPointArr = AStar.readyToCal(this.starId, endId)
+        if (this.wayPointArr.length <= 0) {
+            return
         }
-        return posArr;
-    }
-
-    getValidPoint() {
-
+        this.targetNode = this.wayPointArr[0]
     }
 
     onUpdate() {
-        //if (GameLogicCrl.Share.isOver) return
-        this.targetNode = null
-        if (this.isGotCheese) {
-            this.targetNode = GameLogicCrl.Share.propNode.getChildByName('DesDoor') as Laya.Sprite3D
-            return
-        }
-
-        if (this.curId == GameLogicCrl.Share.cheeseId && this.isStayPoint) {
-            this.targetNode = GameLogicCrl.Share.propNode.getChildByName('Cheese') as Laya.Sprite3D
-            return
-        }
-
-        let posArr = this.getValidPos();
-        if (posArr.length > 0) {
-            if (posArr.indexOf(this.curId) != -1) {
-                this.targetNode = GameLogicCrl.Share.currentPosNode.getChildAt(this.curId) as Laya.Sprite3D;
-            } else {
-                this.targetNode = null;
-            }
-        } else {
-            this.targetNode = null;
-        }
-
-        if (this.targetNode == null) {
-            this.targetNode = GameLogicCrl.Share.currentPointsNode.getChildAt(this.curId) as Laya.Sprite3D;
-        }
+        this.starId = AStar.getMyStarId(this.myOwner.transform.position.clone())
     }
 
     onLateUpdate() {
-        if (this.targetNode != null && this.tempTargetNode != this.targetNode && !this.isHurt && !GameLogicCrl.Share.isDefeat) {
+        if (this.targetNode != null && !this.isHurt && !GameLogicCrl.Share.isDefeat) {
             this.myOwner.transform.lookAt(this.targetNode.transform.position.clone(), new Laya.Vector3(0, 1, 0))
             this.myOwner.transform.localRotationEulerY += 180
 
@@ -97,19 +72,14 @@ export default class Mouse extends Laya.Script3D {
             }
 
             let dis = Laya.Vector3.distance(this.myOwner.transform.position.clone(), this.targetNode.transform.position.clone());
-            if (dis <= 0.4) {
-                if (this.targetNode.parent.name == 'PosNode') {
-                    this.curId += 1
-                } else if (this.curId >= GameLogicCrl.Share.currentPosNode.numChildren) {
-                    this.curId += 1
+            if (dis <= 0.2) {
+                if (this.wayPointArr.length > 1) {
+                    this.wayPointArr.splice(0, 1)
+                    this.targetNode = this.wayPointArr[0]
+                } else {
+                    //到达目标点
+                    this.targetNode = null
                 }
-
-                if (this.targetNode.parent.name == 'PosNode') {
-                    this.isStayPoint = false
-                } else if (this.targetNode.parent.name == 'PointNode') {
-                    this.isStayPoint = true
-                }
-                this.tempTargetNode = this.targetNode
             }
         } else {
             if (this._ani.getCurrentAnimatorPlayState().animatorState.name == 'run') {
@@ -123,9 +93,9 @@ export default class Mouse extends Laya.Script3D {
     }
 
     onCollisionEnter(collision: laya.d3.physics.Collision) {
-        let node = collision.other.owner as Laya.Sprite3D
-        if (node.name.search('Mouse') != -1) return
-        this.checkIsProp(node)
+        // let node = collision.other.owner as Laya.Sprite3D
+        // if (node.name.search('Mouse') != -1) return
+        // this.checkIsProp(node)
     }
 
     checkIsProp(prop: Laya.Sprite3D) {
@@ -162,13 +132,12 @@ export default class Mouse extends Laya.Script3D {
     }
 
     triggerInDoor() {
-        let outDoor: Laya.Sprite3D = GameLogicCrl.Share.getPropByName(PropName.PROP_OUTDOOR)
-        let desId: number = parseInt(outDoor.getChildAt(0).name)
-        let pos = outDoor.transform.position.clone()
-        this.myOwner.transform.position = pos
-        this.curId = desId
-        this.tempTargetNode = null
-        this.isStayPoint = false
+        // let outDoor: Laya.Sprite3D = GameLogicCrl.Share.getPropByName(PropName.PROP_OUTDOOR)
+        // let desId: number = parseInt(outDoor.getChildAt(0).name)
+        // let pos = outDoor.transform.position.clone()
+        // this.myOwner.transform.position = pos
+        // this.curId = desId
+        // this.tempTargetNode = null
     }
 
     triggerPepper() {

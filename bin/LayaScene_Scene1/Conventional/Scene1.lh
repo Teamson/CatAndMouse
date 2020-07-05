@@ -6339,11 +6339,40 @@
 								"isTrigger":true
 							}
 						],
-						"child":[]
+						"child":[
+							{
+								"type":"Sprite3D",
+								"instanceID":194,
+								"props":{
+									"name":"4",
+									"active":true,
+									"isStatic":false,
+									"layer":0,
+									"position":[
+										0,
+										0,
+										0
+									],
+									"rotation":[
+										0,
+										0,
+										0,
+										-1
+									],
+									"scale":[
+										1,
+										1,
+										1
+									]
+								},
+								"components":[],
+								"child":[]
+							}
+						]
 					},
 					{
 						"type":"Sprite3D",
-						"instanceID":194,
+						"instanceID":195,
 						"props":{
 							"name":"DesDoor",
 							"active":true,
@@ -6393,7 +6422,7 @@
 						"child":[
 							{
 								"type":"MeshSprite3D",
-								"instanceID":195,
+								"instanceID":196,
 								"props":{
 									"name":"Door_Case",
 									"active":true,
@@ -6428,7 +6457,7 @@
 							},
 							{
 								"type":"MeshSprite3D",
-								"instanceID":196,
+								"instanceID":197,
 								"props":{
 									"name":"Door_Plank",
 									"active":true,
@@ -6467,7 +6496,7 @@
 			},
 			{
 				"type":"Sprite3D",
-				"instanceID":197,
+				"instanceID":198,
 				"props":{
 					"name":"TeachInfo",
 					"active":true,
@@ -6494,7 +6523,7 @@
 				"child":[
 					{
 						"type":"MeshSprite3D",
-						"instanceID":198,
+						"instanceID":199,
 						"props":{
 							"name":"Cube",
 							"active":true,

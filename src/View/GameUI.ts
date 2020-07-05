@@ -2,6 +2,7 @@ import GameLogicCrl from "../Crl/GameLogicCrl"
 import Utility from "../Mod/Utility"
 import Capsule from "../Crl/Capsule"
 import PlayerDataMgr, { PlayerData } from "../Libs/PlayerDataMgr"
+import AStar from "../Libs/AStar"
 
 export default class GameUI extends Laya.Scene {
     constructor() {
@@ -39,9 +40,10 @@ export default class GameUI extends Laya.Scene {
         GameLogicCrl.Share._camera.viewportPointToRay(pos, ray)
         GameLogicCrl.Share._scene.physicsSimulation.rayCast(ray, hitResult)
         if (hitResult.succeeded && hitResult.collider.owner.name == 'Coll') {
-            //console.log(hitResult.collider.owner.name);
             let torus = hitResult.collider.owner.parent;
             (torus.getComponent(Capsule) as Capsule).clicked();
+            GameLogicCrl.Share.checkStarPointIsColl()
+            GameLogicCrl.Share.mouseMove()
         }
     }
 

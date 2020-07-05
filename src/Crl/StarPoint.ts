@@ -1,4 +1,5 @@
 import GameLogicCrl from "./GameLogicCrl"
+import AStar from "../Libs/AStar"
 
 export default class StarPoint extends Laya.Script {
     constructor() {
@@ -7,45 +8,38 @@ export default class StarPoint extends Laya.Script {
     myOwner: Laya.Sprite3D = null
     myBox: Laya.BoundBox = null
 
+    arrIndex: Laya.Vector2 = new Laya.Vector2(0, 0)
+    myId: number = 0
+    aStarF: number = 0
+    aStarG: number = 0
+    aStarH: number = 0
     isColl: boolean = false
 
     onAwake() {
         this.myOwner = this.owner as Laya.Sprite3D
+        this.myId = this.myOwner.parent.getChildIndex(this.myOwner)
+        this.arrIndex.x = Math.floor(this.myId % 9)
+        this.arrIndex.y = Math.floor(this.myId / 9)
 
-        // let coll: Laya.PhysicsCollider = this.myOwner.getComponent(Laya.PhysicsCollider)
-        // let shape: Laya.BoxColliderShape = coll.colliderShape as Laya.BoxColliderShape
-        // let sNodePos: Laya.Vector3 = this.myOwner.transform.position.clone()
-        // sNodePos.x += shape.localOffset.x
-        // sNodePos.y += shape.localOffset.y
-        // sNodePos.z += shape.localOffset.z
-        // let min: Laya.Vector3 = new Laya.Vector3(sNodePos.x - shape.sizeX / 2, sNodePos.y - shape.sizeY / 2, sNodePos.z - shape.sizeZ / 2)
-        // let max: Laya.Vector3 = new Laya.Vector3(sNodePos.x + shape.sizeX / 2, sNodePos.y + shape.sizeY / 2, sNodePos.z + shape.sizeZ / 2)
-        // let bb = new Laya.BoundBox(min, max)
-        // this.myBox = bb
+        this.checkIsColl()
     }
 
-    checkIsContainPoint(p: Laya.Vector3) {
-        // if (Laya.CollisionUtils.boxContainsPoint(this.myBox, p)) {
-        //     return true
-        // } else {
-        //     return false
-        // }
-        if (Laya.Vector3.distance(this.myOwner.transform.position.clone(), p) < 1) {
-            return true
-        } else {
-            return false
-        }
-    }
-
-    onUpdate() {
+    checkIsColl() {
         for (let i = 0; i < GameLogicCrl.Share.collPoints.length; i++) {
             let c = GameLogicCrl.Share.collPoints[i] as Laya.Sprite3D
-            if (this.checkIsContainPoint(c.transform.position.clone())) {
+            let cPos = new Laya.Vector2(c.transform.position.clone().x, c.transform.position.clone().z)
+            let mPos = new Laya.Vector2(this.myOwner.transform.position.clone().x, this.myOwner.transform.position.clone().z)
+
+            if (mPos.x <= cPos.x + AStar.gridWidth / 2 && mPos.x >= cPos.x - AStar.gridWidth / 2 &&
+                mPos.y <= cPos.y + AStar.gridWidth / 2 && mPos.y >= cPos.y - AStar.gridWidth / 2) {
                 this.isColl = true
-                console.log(this.owner.name)
                 return
             }
         }
         this.isColl = false
+    }
+
+    onUpdate() {
+        
     }
 }

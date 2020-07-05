@@ -163,35 +163,6 @@
     WxApi.launchGameUI = false;
     WxApi.firstStartGame = false;
 
-    class Capsule extends Laya.Script3D {
-        constructor() {
-            super();
-            this.myOwner = null;
-            this.startPos = new Laya.Vector3(0, 0, 0);
-            this.myDir = new Laya.Vector3(0, 0, 0);
-            this.moveDis = 6;
-            this.isOpen = false;
-        }
-        onAwake() {
-            this.myOwner = this.owner;
-            this.startPos = this.myOwner.transform.position.clone();
-            this.myOwner.transform.getUp(this.myDir);
-            this.myDir = new Laya.Vector3(-this.myDir.x, -this.myDir.y, -this.myDir.z);
-        }
-        clicked() {
-            if (this.isOpen) {
-                this.myOwner.transform.position = this.startPos.clone();
-            }
-            else {
-                let d = new Laya.Vector3(this.myDir.x * this.moveDis, this.myDir.y * this.moveDis, this.myDir.z * this.moveDis);
-                let pos = new Laya.Vector3(0, 0, 0);
-                Laya.Vector3.add(this.myOwner.transform.position.clone(), d, pos);
-                this.myOwner.transform.position = pos;
-            }
-            this.isOpen = !this.isOpen;
-        }
-    }
-
     var PropName;
     (function (PropName) {
         PropName["PROP_CLIP"] = "Clip";
@@ -204,6 +175,165 @@
         PropName["PROP_DESDOOR"] = "DesDoor";
     })(PropName || (PropName = {}));
 
+    class StarPoint extends Laya.Script {
+        constructor() {
+            super();
+            this.myOwner = null;
+            this.myBox = null;
+            this.arrIndex = new Laya.Vector2(0, 0);
+            this.myId = 0;
+            this.aStarF = 0;
+            this.aStarG = 0;
+            this.aStarH = 0;
+            this.isColl = false;
+        }
+        onAwake() {
+            this.myOwner = this.owner;
+            this.myId = this.myOwner.parent.getChildIndex(this.myOwner);
+            this.arrIndex.x = Math.floor(this.myId % 9);
+            this.arrIndex.y = Math.floor(this.myId / 9);
+            this.checkIsColl();
+        }
+        checkIsColl() {
+            for (let i = 0; i < GameLogicCrl.Share.collPoints.length; i++) {
+                let c = GameLogicCrl.Share.collPoints[i];
+                let cPos = new Laya.Vector2(c.transform.position.clone().x, c.transform.position.clone().z);
+                let mPos = new Laya.Vector2(this.myOwner.transform.position.clone().x, this.myOwner.transform.position.clone().z);
+                if (mPos.x <= cPos.x + AStar.gridWidth / 2 && mPos.x >= cPos.x - AStar.gridWidth / 2 &&
+                    mPos.y <= cPos.y + AStar.gridWidth / 2 && mPos.y >= cPos.y - AStar.gridWidth / 2) {
+                    this.isColl = true;
+                    return;
+                }
+            }
+            this.isColl = false;
+        }
+        onUpdate() {
+        }
+    }
+
+    class AStar {
+        static initAStar() {
+            this.mapNodeArr = [];
+            this.openList = [];
+            this.closeList = [];
+            this.currentNode = null;
+            for (let i = 0; i < GameLogicCrl.Share._starNode.numChildren; i++) {
+                this.mapNodeArr.push(GameLogicCrl.Share._starNode.getChildAt(i));
+            }
+        }
+        static getMyStarId(pos) {
+            for (let i = 0; i < this.mapNodeArr.length; i++) {
+                let n = this.mapNodeArr[i];
+                let nPos = new Laya.Vector2(n.transform.position.clone().x, n.transform.position.clone().z);
+                let mPos = new Laya.Vector2(pos.x, pos.z);
+                if (mPos.x <= nPos.x + this.gridWidth / 2 && mPos.x >= nPos.x - this.gridWidth / 2 &&
+                    mPos.y <= nPos.y + this.gridWidth / 2 && mPos.y >= nPos.y - this.gridWidth / 2) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        static getNodeById(id) {
+            return this.mapNodeArr[id];
+        }
+        static getArrIndexById(id) {
+            let xx = Math.floor(id % 9);
+            let yy = Math.floor(id / 9);
+            return new Laya.Vector2(xx, yy);
+        }
+        static getPCrl(id) {
+            let p = this.getNodeById(id);
+            let crl = p.getComponent(StarPoint);
+            return crl;
+        }
+        static getNearGrids(id) {
+            let arr = [];
+            if (this.getPCrl(id).arrIndex.y - 1 >= 0) {
+                let n = this.getNodeById(id - 9);
+                if (this.closeList.indexOf(n) == -1 && this.openList.indexOf(n) == -1 && !n.getComponent(StarPoint).isColl)
+                    arr.push(n);
+            }
+            if (this.getPCrl(id).arrIndex.x + 1 <= 8) {
+                let n = this.getNodeById(id + 1);
+                if (this.closeList.indexOf(n) == -1 && this.openList.indexOf(n) == -1 && !n.getComponent(StarPoint).isColl)
+                    arr.push(n);
+            }
+            if (this.getPCrl(id).arrIndex.y + 1 <= 12) {
+                let n = this.getNodeById(id + 9);
+                if (this.closeList.indexOf(n) == -1 && this.openList.indexOf(n) == -1 && !n.getComponent(StarPoint).isColl)
+                    arr.push(n);
+            }
+            if (this.getPCrl(id).arrIndex.x - 1 >= 0) {
+                let n = this.getNodeById(id - 1);
+                if (this.closeList.indexOf(n) == -1 && this.openList.indexOf(n) == -1 && !n.getComponent(StarPoint).isColl)
+                    arr.push(n);
+            }
+            return arr;
+        }
+        static readyToCal(startId, endId) {
+            this.closeList = [];
+            this.openList = [];
+            this.currentNode = null;
+            for (let i = 0; i < this.mapNodeArr.length; i++) {
+                this.mapNodeArr[i].getComponent(StarPoint).aStarF = 0;
+                this.mapNodeArr[i].getComponent(StarPoint).aStarG = 0;
+                this.mapNodeArr[i].getComponent(StarPoint).aStarH = 0;
+            }
+            this.closeList.push(this.getNodeById(startId));
+            this.currentNode = this.getNodeById(startId);
+            this.calWayPoint(startId, endId);
+            if (this.closeList.length <= 0) {
+                return [];
+            }
+            return this.closeList[this.closeList.length - 1].getComponent(StarPoint).myId == endId ? this.closeList : [];
+        }
+        static calWayPoint(startId, endId) {
+            let nArr = this.getNearGrids(startId);
+            if (nArr.length <= 0) {
+                return;
+            }
+            let minF = 999;
+            let minN = null;
+            for (let i = 0; i < nArr.length; i++) {
+                let n = nArr[i];
+                let nCrl = n.getComponent(StarPoint);
+                nCrl.aStarG += 10 + this.currentNode.getComponent(StarPoint).aStarG;
+                nCrl.aStarH = Math.abs(nCrl.arrIndex.x - this.getArrIndexById(endId).x) + Math.abs(nCrl.arrIndex.y - this.getArrIndexById(endId).y);
+                nCrl.aStarF = nCrl.aStarG + nCrl.aStarH;
+                if (nCrl.aStarF <= minF) {
+                    minF = nCrl.aStarF;
+                    minN = n;
+                }
+                this.openList.push(n);
+            }
+            if (minN) {
+                this.closeList.push(minN);
+                this.currentNode = minN;
+                if (minN.getComponent(StarPoint).myId == endId) {
+                }
+                else {
+                    let closeListLength = this.closeList.length;
+                    this.calWayPoint(this.mapNodeArr.indexOf(minN), endId);
+                    if (closeListLength == this.closeList.length) {
+                        this.closeList.splice(this.closeList.indexOf(minN), 1);
+                        nArr.splice(nArr.indexOf(minN), 1);
+                        if (nArr.length > 0) {
+                            let n = nArr[0];
+                            this.calWayPoint(this.mapNodeArr.indexOf(n), endId);
+                        }
+                    }
+                }
+            }
+            else {
+            }
+        }
+    }
+    AStar.mapNodeArr = [];
+    AStar.currentNode = null;
+    AStar.gridWidth = 1;
+    AStar.openList = [];
+    AStar.closeList = [];
+
     class Mouse extends Laya.Script3D {
         constructor() {
             super();
@@ -212,65 +342,40 @@
             this._ani = null;
             this.targetNode = null;
             this.tempTargetNode = null;
-            this.pointTarget = null;
-            this.isStayPoint = true;
             this.isGotDes = false;
             this.isGotCheese = false;
             this.isHurt = false;
             this.curId = 0;
             this.speed = 0.05;
+            this.starId = 0;
+            this.wayPointArr = [];
         }
         onAwake() {
             this.myOwner = this.owner;
             this._ani = this.myOwner.getComponent(Laya.Animator);
             this.playAniByName('idle');
             this._body = this.myOwner.getComponent(Laya.Rigidbody3D);
-            this.tempTargetNode = GameLogicCrl.Share.currentPointsNode.getChildAt(0);
+            this.starId = AStar.getMyStarId(this.myOwner.transform.position.clone());
         }
         playAniByName(name) {
             this._ani.play(name);
         }
-        getValidPos() {
-            let posArr = [];
-            for (let i = 0; i < GameLogicCrl.Share.currentCollNode.numChildren; i++) {
-                let coll = GameLogicCrl.Share.currentCollNode.getChildAt(i);
-                let cCrl = coll.getComponent(Capsule);
-                if (cCrl.isOpen) {
-                    posArr.push(i);
-                }
+        findWayPoint(endId) {
+            this.targetNode = null;
+            this.wayPointArr = [];
+            if (this.starId == -1)
+                return;
+            this.wayPointArr = AStar.readyToCal(this.starId, endId);
+            if (this.wayPointArr.length <= 0) {
+                return;
             }
-            return posArr;
-        }
-        getValidPoint() {
+            this.targetNode = this.wayPointArr[0];
         }
         onUpdate() {
-            this.targetNode = null;
-            if (this.isGotCheese) {
-                this.targetNode = GameLogicCrl.Share.propNode.getChildByName('DesDoor');
-                return;
-            }
-            if (this.curId == GameLogicCrl.Share.cheeseId && this.isStayPoint) {
-                this.targetNode = GameLogicCrl.Share.propNode.getChildByName('Cheese');
-                return;
-            }
-            let posArr = this.getValidPos();
-            if (posArr.length > 0) {
-                if (posArr.indexOf(this.curId) != -1) {
-                    this.targetNode = GameLogicCrl.Share.currentPosNode.getChildAt(this.curId);
-                }
-                else {
-                    this.targetNode = null;
-                }
-            }
-            else {
-                this.targetNode = null;
-            }
-            if (this.targetNode == null) {
-                this.targetNode = GameLogicCrl.Share.currentPointsNode.getChildAt(this.curId);
-            }
+            this.starId = AStar.getMyStarId(this.myOwner.transform.position.clone());
         }
         onLateUpdate() {
-            if (this.targetNode != null && this.tempTargetNode != this.targetNode && !this.isHurt && !GameLogicCrl.Share.isDefeat) {
+            if (this.targetNode != null && !this.isHurt && !GameLogicCrl.Share.isDefeat) {
                 this.myOwner.transform.lookAt(this.targetNode.transform.position.clone(), new Laya.Vector3(0, 1, 0));
                 this.myOwner.transform.localRotationEulerY += 180;
                 let dir = new Laya.Vector3(0, 0, 0);
@@ -284,20 +389,14 @@
                     this.playAniByName('run');
                 }
                 let dis = Laya.Vector3.distance(this.myOwner.transform.position.clone(), this.targetNode.transform.position.clone());
-                if (dis <= 0.4) {
-                    if (this.targetNode.parent.name == 'PosNode') {
-                        this.curId += 1;
+                if (dis <= 0.2) {
+                    if (this.wayPointArr.length > 1) {
+                        this.wayPointArr.splice(0, 1);
+                        this.targetNode = this.wayPointArr[0];
                     }
-                    else if (this.curId >= GameLogicCrl.Share.currentPosNode.numChildren) {
-                        this.curId += 1;
+                    else {
+                        this.targetNode = null;
                     }
-                    if (this.targetNode.parent.name == 'PosNode') {
-                        this.isStayPoint = false;
-                    }
-                    else if (this.targetNode.parent.name == 'PointNode') {
-                        this.isStayPoint = true;
-                    }
-                    this.tempTargetNode = this.targetNode;
                 }
             }
             else {
@@ -310,10 +409,6 @@
         onTriggerEnter(other) {
         }
         onCollisionEnter(collision) {
-            let node = collision.other.owner;
-            if (node.name.search('Mouse') != -1)
-                return;
-            this.checkIsProp(node);
         }
         checkIsProp(prop) {
             switch (prop.name) {
@@ -346,19 +441,41 @@
             this._body.isTrigger = true;
         }
         triggerInDoor() {
-            let outDoor = GameLogicCrl.Share.getPropByName(PropName.PROP_OUTDOOR);
-            let desId = parseInt(outDoor.getChildAt(0).name);
-            let pos = outDoor.transform.position.clone();
-            this.myOwner.transform.position = pos;
-            this.curId = desId;
-            this.tempTargetNode = null;
-            this.isStayPoint = false;
         }
         triggerPepper() {
         }
         triggerFire() {
         }
         triggerCoin() {
+        }
+    }
+
+    class Capsule extends Laya.Script3D {
+        constructor() {
+            super();
+            this.myOwner = null;
+            this.startPos = new Laya.Vector3(0, 0, 0);
+            this.myDir = new Laya.Vector3(0, 0, 0);
+            this.moveDis = 6;
+            this.isOpen = false;
+        }
+        onAwake() {
+            this.myOwner = this.owner;
+            this.startPos = this.myOwner.transform.position.clone();
+            this.myOwner.transform.getUp(this.myDir);
+            this.myDir = new Laya.Vector3(-this.myDir.x, -this.myDir.y, -this.myDir.z);
+        }
+        clicked() {
+            if (this.isOpen) {
+                this.myOwner.transform.position = this.startPos.clone();
+            }
+            else {
+                let d = new Laya.Vector3(this.myDir.x * this.moveDis, this.myDir.y * this.moveDis, this.myDir.z * this.moveDis);
+                let pos = new Laya.Vector3(0, 0, 0);
+                Laya.Vector3.add(this.myOwner.transform.position.clone(), d, pos);
+                this.myOwner.transform.position = pos;
+            }
+            this.isOpen = !this.isOpen;
         }
     }
 
@@ -369,70 +486,17 @@
             this._ani = null;
             this._body = null;
             this.targetNode = null;
-            this.tempTargetNode = null;
-            this.prePosArr = [];
             this.isHurt = false;
-            this.isCatchMouse = false;
-            this.isStayPoint = true;
-            this.isIncreaseId = false;
-            this.curId = 3;
             this.speed = 0.06;
         }
         onAwake() {
             this.myOwner = this.owner;
-            this.curId = parseInt(this.myOwner.getChildAt(0).name);
             this._ani = this.myOwner.getComponent(Laya.Animator);
             this._body = this.myOwner.getComponent(Laya.Rigidbody3D);
             this._body.linearVelocity = new Laya.Vector3(0, 0, 0);
-            this.targetNode = GameLogicCrl.Share.currentPointsNode.getChildAt(this.curId);
         }
         playAniByName(name) {
             this._ani.play(name);
-        }
-        getValidPos() {
-            let posArr = [];
-            for (let i = 0; i < GameLogicCrl.Share.currentCollNode.numChildren; i++) {
-                let coll = GameLogicCrl.Share.currentCollNode.getChildAt(i);
-                let cCrl = coll.getComponent(Capsule);
-                if (cCrl.isOpen) {
-                    posArr.push(i);
-                }
-            }
-            return posArr;
-        }
-        checkCanCatchMouse() {
-            let caughtMouseArr = [];
-            let catId = this.curId;
-            for (let i = 0; i < GameLogicCrl.Share._MouseNode.numChildren; i++) {
-                let mouse = GameLogicCrl.Share._MouseNode.getChildAt(i);
-                let mCrl = mouse.getComponent(Mouse);
-                let mouseId = mCrl.curId;
-                if (catId == mouseId || this.checkContinues(catId, mouseId)) {
-                    caughtMouseArr.push(mouse);
-                }
-            }
-            return caughtMouseArr;
-        }
-        checkContinues(catNum, mouseNum) {
-            let posArr = this.getValidPos();
-            if (posArr.length <= 0) {
-                return false;
-            }
-            if (catNum > mouseNum) {
-                for (let i = mouseNum; i < catNum; i++) {
-                    if (posArr.indexOf(i) == -1) {
-                        return false;
-                    }
-                }
-            }
-            else {
-                for (let i = catNum; i < mouseNum; i++) {
-                    if (posArr.indexOf(i) == -1) {
-                        return false;
-                    }
-                }
-            }
-            return true;
         }
         closestMouse(arr) {
             if (arr.length <= 0) {
@@ -444,58 +508,49 @@
             });
             return arr[0];
         }
-        onUpdate() {
-            if (GameLogicCrl.Share.isOver)
-                return;
-            this.targetNode = null;
-            this.isCatchMouse = false;
-            let cmArr = this.checkCanCatchMouse();
-            if (cmArr.length > 0) {
-                this.isCatchMouse = true;
-                let mouse = this.closestMouse(cmArr);
-                let cId = this.curId;
-                let mId = mouse.getComponent(Mouse).curId;
-                if (cId == mId) {
-                    this.targetNode = mouse;
+        checkCanCatchMouse() {
+            let cArr = [];
+            let lMin = 999;
+            for (let i = 0; i < GameLogicCrl.Share._MouseNode.numChildren; i++) {
+                let m = GameLogicCrl.Share._MouseNode.getChildAt(i);
+                let mCrl = m.getComponent(Mouse);
+                if (mCrl.starId == -1) {
+                    continue;
                 }
-                else if (cId > mId) {
-                    this.isIncreaseId = true;
-                    if (this.isStayPoint) {
-                        this.targetNode = GameLogicCrl.Share.currentPosNode.getChildAt(this.curId - 1);
-                    }
-                    else {
-                        this.targetNode = GameLogicCrl.Share.currentPointsNode.getChildAt(this.curId);
-                    }
-                }
-                else {
-                    this.isIncreaseId = false;
-                    if (this.isStayPoint) {
-                        this.targetNode = GameLogicCrl.Share.currentPosNode.getChildAt(this.curId);
-                    }
-                    else {
-                        this.targetNode = GameLogicCrl.Share.currentPointsNode.getChildAt(this.curId + 1);
-                    }
+                let cId = AStar.getMyStarId(this.myOwner.transform.position.clone());
+                let arr = AStar.readyToCal(cId, mCrl.starId);
+                if (arr.length <= 0)
+                    continue;
+                if (arr.length <= lMin) {
+                    cArr = arr;
+                    lMin = arr.length;
                 }
             }
+            if (cArr.length > 0) {
+                return cArr;
+            }
             else {
-                let vpArr = this.getValidPos();
-                if (vpArr.length > 0) {
-                    for (let i = 0; i < vpArr.length; i++) {
-                        let vpId = vpArr[i];
-                        let cId = this.curId;
-                        if (Math.abs(vpId - cId) <= 1 && this.isStayPoint && this.prePosArr.indexOf(vpId) == -1) {
-                            this.targetNode = GameLogicCrl.Share.currentPosNode.getChildAt(vpId);
-                            this.isIncreaseId = cId > vpId;
-                            return;
-                        }
-                    }
-                }
-                if (!this.isStayPoint)
-                    this.targetNode = GameLogicCrl.Share.currentPointsNode.getChildAt(this.curId);
+                return [];
+            }
+        }
+        onUpdate() {
+            if (GameLogicCrl.Share.isOver || this.targetNode)
+                return;
+            let arr = this.checkCanCatchMouse();
+            if (arr.length > 1) {
+                this.targetNode = arr[1];
             }
         }
         onLateUpdate() {
-            if (this.targetNode && this.tempTargetNode != this.targetNode && !this.isHurt && !GameLogicCrl.Share.isOver) {
+            if (!this.isHurt) {
+                for (let i = 0; i < GameLogicCrl.Share._MouseNode.numChildren; i++) {
+                    let m = GameLogicCrl.Share._MouseNode.getChildAt(i);
+                    if (Laya.Vector3.distance(this.myOwner.transform.position.clone(), m.transform.position.clone()) <= 1) {
+                        GameLogicCrl.Share.mouseIsCaught(m);
+                    }
+                }
+            }
+            if (this.targetNode && !this.isHurt && !GameLogicCrl.Share.isOver) {
                 this.myOwner.transform.lookAt(this.targetNode.transform.position.clone(), new Laya.Vector3(0, 1, 0));
                 this.myOwner.transform.localRotationEulerY += 180;
                 let dir = new Laya.Vector3(0, 0, 0);
@@ -509,48 +564,8 @@
                     this.playAniByName('walk');
                 }
                 let dis = Laya.Vector3.distance(this.myOwner.transform.position.clone(), this.targetNode.transform.position.clone());
-                if (this.targetNode.parent && this.targetNode.parent.name == 'MouseNode' && dis <= 1) {
-                    GameLogicCrl.Share.mouseIsCaught(this.targetNode);
+                if (dis <= 0.2) {
                     this.targetNode = null;
-                    this.tempTargetNode = this.targetNode;
-                }
-                else if (this.targetNode.parent && this.targetNode.parent.name == 'PosNode' && dis <= 0.3) {
-                    if (this.isCatchMouse) {
-                        if (this.isIncreaseId) {
-                            this.curId--;
-                        }
-                        else {
-                            this.curId++;
-                        }
-                    }
-                    else {
-                        if (this.isIncreaseId) {
-                            this.curId--;
-                        }
-                        else {
-                            if (this.curId + 1 >= GameLogicCrl.Share.currentCollNode.numChildren) {
-                                this.curId = 0;
-                            }
-                        }
-                    }
-                    this.prePosArr.push(GameLogicCrl.Share.currentPosNode.getChildIndex(this.targetNode));
-                    this.isStayPoint = false;
-                    this.tempTargetNode = this.targetNode;
-                }
-                else if (this.targetNode.parent && this.targetNode.parent.name == 'PointNode' && dis <= 0.3) {
-                    if (this.isCatchMouse) {
-                        if (this.isIncreaseId) {
-                            this.curId--;
-                        }
-                        else {
-                            this.curId++;
-                        }
-                        this.isStayPoint = true;
-                    }
-                    else {
-                    }
-                    this.isStayPoint = true;
-                    this.tempTargetNode = this.targetNode;
                 }
             }
             else {
@@ -1021,37 +1036,6 @@
         }
     }
 
-    class StarPoint extends Laya.Script {
-        constructor() {
-            super();
-            this.myOwner = null;
-            this.myBox = null;
-            this.isColl = false;
-        }
-        onAwake() {
-            this.myOwner = this.owner;
-        }
-        checkIsContainPoint(p) {
-            if (Laya.Vector3.distance(this.myOwner.transform.position.clone(), p) < 1) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-        onUpdate() {
-            for (let i = 0; i < GameLogicCrl.Share.collPoints.length; i++) {
-                let c = GameLogicCrl.Share.collPoints[i];
-                if (this.checkIsContainPoint(c.transform.position.clone())) {
-                    this.isColl = true;
-                    console.log(this.owner.name);
-                    return;
-                }
-            }
-            this.isColl = false;
-        }
-    }
-
     class GameLogicCrl {
         constructor() {
             this._gradeScene = null;
@@ -1085,6 +1069,7 @@
             this._camera = this._scene.getChildByName('Main Camera');
             this._light = this._scene.getChildByName('Directional Light');
             this._starNode = this._scene.getChildByName('AStarNode');
+            AStar.initAStar();
             this.createGameScene();
             for (let i = 0; i < this._starNode.numChildren; i++) {
                 let s = this._starNode.getChildAt(i);
@@ -1092,7 +1077,7 @@
             }
         }
         createGameScene() {
-            let curGid = 1;
+            let curGid = 4;
             let sceneRes = Laya.loader.getRes(WxApi.UnityPath + 'Scene' + curGid + '.lh');
             this._gradeScene = Laya.Sprite3D.instantiate(sceneRes, this._scene, false, new Laya.Vector3(0, 0, 0));
             this._Cat = this._gradeScene.getChildByName('Cat');
@@ -1102,7 +1087,7 @@
             this.currentPosNode = this._gradeScene.getChildByName('PosNode');
             this.propNode = this._gradeScene.getChildByName('PropNode');
             for (let i = 0; i < this.currentCollNode.numChildren; i++) {
-                let pn = this._gradeScene.getChildByName('PointNode');
+                let pn = this.currentCollNode.getChildAt(i).getChildByName('PointNode');
                 for (let j = 0; j < pn.numChildren; j++) {
                     this.collPoints.push(pn.getChildAt(j));
                 }
@@ -1139,10 +1124,21 @@
         getPropByName(name) {
             return this.propNode.getChildByName(name);
         }
+        checkStarPointIsColl() {
+            for (let i = 0; i < this._starNode.numChildren; i++) {
+                this._starNode.getChildAt(i).getComponent(StarPoint).checkIsColl();
+            }
+        }
         mouseIsCaught(mouse) {
             mouse.destroy();
             if (this._MouseNode.numChildren < this.countForWin) {
                 this.gameOverCallback();
+            }
+        }
+        mouseMove() {
+            for (let i = 0; i < this._MouseNode.numChildren; i++) {
+                let mCrl = this._MouseNode.getChildAt(i).getComponent(Mouse);
+                mCrl.findWayPoint(4);
             }
         }
         winCallback() {
@@ -1166,7 +1162,14 @@
             this._gradeScene.removeChildren();
             this._gradeScene.removeSelf();
             this._gradeScene = null;
+            this.collPoints = [];
+            for (let i = 0; i < this._starNode.numChildren; i++) {
+                this._starNode.getChildAt(i).getComponent(StarPoint).destroy();
+                let c = this._starNode.getChildAt(i).addComponent(StarPoint);
+            }
+            AStar.initAStar();
             this.createGameScene();
+            this.checkStarPointIsColl();
         }
     }
 
@@ -1232,6 +1235,8 @@
             if (hitResult.succeeded && hitResult.collider.owner.name == 'Coll') {
                 let torus = hitResult.collider.owner.parent;
                 torus.getComponent(Capsule).clicked();
+                GameLogicCrl.Share.checkStarPointIsColl();
+                GameLogicCrl.Share.mouseMove();
             }
         }
         touchMove(event) {
@@ -1511,7 +1516,7 @@
     GameConfig.startScene = "MyScenes/DefeatUI.scene";
     GameConfig.sceneRoot = "";
     GameConfig.debug = false;
-    GameConfig.stat = false;
+    GameConfig.stat = true;
     GameConfig.physicsDebug = false;
     GameConfig.exportSceneToJson = true;
     GameConfig.init();

@@ -1,0 +1,8 @@
+{
+  "code": "import GameLogicCrl from \"./GameLogicCrl\";\r\nimport Cat from \"./Cat\";\r\nimport Mouse from \"./Mouse\";\r\nexport default class Clip extends Laya.Script3D {\r\n    constructor() {\r\n        super();\r\n        this.myOwner = null;\r\n    }\r\n    onAwake() {\r\n        this.myOwner = this.owner;\r\n    }\r\n    onUpdate() {\r\n        if (GameLogicCrl.Share._Cat) {\r\n            if (Laya.Vector3.distance(GameLogicCrl.Share._Cat.transform.position.clone(), this.myOwner.transform.position.clone()) <= 0.8) {\r\n                let cCrl = GameLogicCrl.Share._Cat.getComponent(Cat);\r\n                cCrl.triggerClip(this.myOwner);\r\n            }\r\n        }\r\n        for (let i = 0; i < GameLogicCrl.Share._MouseNode.numChildren; i++) {\r\n            let mouse = GameLogicCrl.Share._MouseNode.getChildAt(i);\r\n            let mCrl = mouse.getComponent(Mouse);\r\n            if (Laya.Vector3.distance(mouse.transform.position.clone(), this.myOwner.transform.position.clone()) <= 0.5) {\r\n                mCrl.triggerClip(this.myOwner);\r\n            }\r\n        }\r\n    }\r\n}\r\n",
+  "references": [
+    "E:/GitProjects/CatAndMouse/src/Crl/GameLogicCrl.ts",
+    "E:/GitProjects/CatAndMouse/src/Crl/Cat.ts",
+    "E:/GitProjects/CatAndMouse/src/Crl/Mouse.ts"
+  ]
+}

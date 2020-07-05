@@ -8,6 +8,7 @@ import Clip from "./Clip";
 import TimeCountMgr from "../Libs/TimeCountMgr";
 import ShareMgr from "../Mod/ShareMgr";
 import StarPoint from "./StarPoint";
+import AStar from "../Libs/AStar";
 
 export default class GameLogicCrl {
     public static Share: GameLogicCrl
@@ -58,7 +59,7 @@ export default class GameLogicCrl {
         this._camera = this._scene.getChildByName('Main Camera') as Laya.Camera
         this._light = this._scene.getChildByName('Directional Light') as Laya.DirectionLight
         this._starNode = this._scene.getChildByName('AStarNode') as Laya.Sprite3D
-
+        AStar.initAStar()
         this.createGameScene()
         for (let i = 0; i < this._starNode.numChildren; i++) {
             let s = this._starNode.getChildAt(i) as Laya.Sprite3D
@@ -67,7 +68,7 @@ export default class GameLogicCrl {
     }
 
     createGameScene() {
-        let curGid: number = 1//PlayerDataMgr.getPlayerData().grade
+        let curGid: number = 4//PlayerDataMgr.getPlayerData().grade
         let sceneRes: Laya.Sprite3D = Laya.loader.getRes(WxApi.UnityPath + 'Scene' + curGid + '.lh') as Laya.Sprite3D
         this._gradeScene = Laya.Sprite3D.instantiate(sceneRes, this._scene, false, new Laya.Vector3(0, 0, 0));
 
@@ -79,7 +80,7 @@ export default class GameLogicCrl {
         this.propNode = this._gradeScene.getChildByName('PropNode') as Laya.Sprite3D
 
         for (let i = 0; i < this.currentCollNode.numChildren; i++) {
-            let pn = this._gradeScene.getChildByName('PointNode') as Laya.Sprite3D
+            let pn = this.currentCollNode.getChildAt(i).getChildByName('PointNode') as Laya.Sprite3D
             for (let j = 0; j < pn.numChildren; j++) {
                 this.collPoints.push(pn.getChildAt(j) as Laya.Sprite3D)
             }
@@ -123,10 +124,23 @@ export default class GameLogicCrl {
         return this.propNode.getChildByName(name) as Laya.Sprite3D
     }
 
+    checkStarPointIsColl() {
+        for (let i = 0; i < this._starNode.numChildren; i++) {
+            (this._starNode.getChildAt(i).getComponent(StarPoint) as StarPoint).checkIsColl();
+        }
+    }
+
     mouseIsCaught(mouse: Laya.Sprite3D) {
         mouse.destroy()
         if (this._MouseNode.numChildren < this.countForWin) {
             this.gameOverCallback()
+        }
+    }
+
+    mouseMove() {
+        for (let i = 0; i < this._MouseNode.numChildren; i++) {
+            let mCrl = this._MouseNode.getChildAt(i).getComponent(Mouse) as Mouse
+            mCrl.findWayPoint(4)
         }
     }
 
@@ -151,6 +165,13 @@ export default class GameLogicCrl {
         this._gradeScene.removeChildren()
         this._gradeScene.removeSelf()
         this._gradeScene = null
+        this.collPoints = []
+        for (let i = 0; i < this._starNode.numChildren; i++) {
+            this._starNode.getChildAt(i).getComponent(StarPoint).destroy()
+            let c= this._starNode.getChildAt(i).addComponent(StarPoint)
+        }
+        AStar.initAStar()
         this.createGameScene()
+        this.checkStarPointIsColl()
     }
 }

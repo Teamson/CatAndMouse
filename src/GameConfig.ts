@@ -20,7 +20,7 @@ export default class GameConfig{
     static startScene:any="MyScenes/DefeatUI.scene";
     static sceneRoot:string="";
     static debug:boolean=false;
-    static stat:boolean=false;
+    static stat:boolean=true;
     static physicsDebug:boolean=false;
     static exportSceneToJson:boolean=true;
     constructor(){}
